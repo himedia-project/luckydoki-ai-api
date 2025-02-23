@@ -1,5 +1,17 @@
 server:
   port: 8081
+  tomcat:
+    uri-encoding: UTF-8
+    # ???? ?? ??
+    relaxed-query-chars: '|,{,},[,],^,`,<,>,\,;,/,?,@,#,$,%,&,=,+'
+    relaxed-path-chars: '|,{,},[,],^,`,<,>,\,;,/,?,@,#,$,%,&,=,+'
+
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
 
 spring:
   datasource:
