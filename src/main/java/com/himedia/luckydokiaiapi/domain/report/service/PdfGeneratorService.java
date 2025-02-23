@@ -64,7 +64,8 @@ public class PdfGeneratorService {
     }
 
     public String generatePdfReport(String aiAnalysis, ReportGenerationRequest request) {
-        String fileName = String.format("monthly-report-%s.pdf",
+        log.info("PDF 리포트 생성 요청 start...");
+        String fileName = String.format("monthly-ai-report-%s.pdf",
                 LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM")));
         String filePath = uploads + File.separator + fileName;
 
@@ -125,8 +126,9 @@ public class PdfGeneratorService {
 
         // 주요 지표 추가
         addMetricCell(table, "신규 회원", metrics.getNewMemberCount() + "명");
+        addMetricCell(table, "신규 셀러", metrics.getNewSellerCount() + "명");
         addMetricCell(table, "총 주문", metrics.getTotalOrderCount() + "건");
-        addMetricCell(table, "매출", "₩" + String.format("%,d", metrics.getTodayRevenue()));
+        addMetricCell(table, "매출", "₩" + String.format("%,d", metrics.getMonthlyRevenue()));
         addMetricCell(table, "커뮤니티 게시글", metrics.getTotalCommunityCount() + "개");
 
         document.add(table);
@@ -195,29 +197,7 @@ public class PdfGeneratorService {
         document.add(performersTable);
     }
 
-    // 상품 테이블 생성 메소드
-    private Table createProductsTable(List<ProductMetricsResponse> products) {
-        Table table = new Table(UnitValue.createPercentArray(new float[]{5, 35, 15, 15, 15, 15}))
-                .useAllAvailableWidth();
-
-        // 테이블 헤더
-        addTableHeader(table, new String[]{"순위", "상품명", "가격", "판매량", "평점", "리뷰수"});
-
-        // 데이터 행 추가
-        for (int i = 0; i < products.size(); i++) {
-            ProductMetricsResponse product = products.get(i);
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(i + 1))));
-            table.addCell(new Cell().add(new Paragraph(product.getName())));
-            table.addCell(new Cell().add(new Paragraph("₩" + String.format("%,d", product.getDiscountPrice()))));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(product.getSalesCount()))));
-            table.addCell(new Cell().add(new Paragraph(String.format("%.1f", product.getReviewAverage()))));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(product.getReviewCount()))));
-        }
-
-        return table;
-    }
-
-    // 기존 addTableHeader 메소드 수정
+    // 내부 테이블 Header 메소드 추가
     private void addTableHeader(Table table, String[] headers) {
         for (String header : headers) {
             table.addCell(
@@ -227,9 +207,41 @@ public class PdfGeneratorService {
                             .setBackgroundColor(new DeviceRgb(245, 245, 245))
                             .setBold()
                             .setTextAlignment(TextAlignment.CENTER)
-                            .setFontSize(9)
+                            .setFontSize(10)
             );
         }
+    }
+
+
+    // 상품 테이블 생성 메소드
+    private Table createProductsTable(List<ProductMetricsResponse> products) {
+        // 컬럼 비율 조정 (총 합 100%)
+        Table table = new Table(UnitValue.createPercentArray(new float[]{5, 15, 25, 10, 15, 10, 10, 10}))
+                .useAllAvailableWidth();
+
+        // 테이블 헤더
+        addTableHeader(table, new String[]{"순위", "카테고리", "상품명", "셀러", "가격", "판매량", "평점", "리뷰수"});
+
+        // 데이터 행 추가
+        for (int i = 0; i < products.size(); i++) {
+            ProductMetricsResponse product = products.get(i);
+            table.addCell(new Cell().add(new Paragraph(String.valueOf(i + 1))));
+            table.addCell(new Cell().add(new Paragraph(String.valueOf(product.getCategoryAllName()))));
+            table.addCell(new Cell().add(new Paragraph(String.valueOf(product.getName()))));
+            table.addCell(new Cell().add(new Paragraph(String.valueOf(product.getShopName()))));
+            table.addCell(new Cell().add(new Paragraph("₩" + String.format("%,d", product.getDiscountPrice()))));
+            table.addCell(new Cell().add(new Paragraph(String.valueOf(product.getSalesCount()))));
+            table.addCell(new Cell().add(new Paragraph(String.format("%.1f", product.getReviewAverage()))));
+            table.addCell(new Cell().add(new Paragraph(String.valueOf(product.getReviewCount()))));
+        }
+
+        // 테이블 스타일링
+        table.setFontSize(9)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMarginTop(10)
+                .setMarginBottom(20);
+
+        return table;
     }
 
 
@@ -266,14 +278,19 @@ public class PdfGeneratorService {
                 MemberMetricsResponse seller = sellers.get(i);
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(i + 1)))
                         .setTextAlignment(TextAlignment.CENTER));
-                table.addCell(new Cell().add(new Paragraph(seller.getNickName())));
+                table.addCell(new Cell().add(new Paragraph(seller.getNickName()))
+                        .setTextAlignment(TextAlignment.CENTER));
                 table.addCell(new Cell().add(new Paragraph(String.format("₩%,d", seller.getMonthlySales())))
                         .setTextAlignment(TextAlignment.RIGHT));
             } else {
                 // 데이터가 없는 경우 빈 셀
-                table.addCell(new Cell().add(new Paragraph("-")));
-                table.addCell(new Cell().add(new Paragraph("-")));
-                table.addCell(new Cell().add(new Paragraph("-")));
+                table.addCell(new Cell().add(new Paragraph("-"))
+                        .setTextAlignment(TextAlignment.CENTER));
+                table.addCell(new Cell().add(new Paragraph("-"))
+                        .setTextAlignment(TextAlignment.CENTER));
+                table.addCell(new Cell().add(new Paragraph("-"))
+                        .setTextAlignment(TextAlignment.CENTER));
+
             }
 
             // 구매자 정보
@@ -281,7 +298,8 @@ public class PdfGeneratorService {
                 MemberMetricsResponse consumer = consumers.get(i);
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(i + 1)))
                         .setTextAlignment(TextAlignment.CENTER));
-                table.addCell(new Cell().add(new Paragraph(consumer.getNickName())));
+                table.addCell(new Cell().add(new Paragraph(consumer.getNickName()))
+                        .setTextAlignment(TextAlignment.CENTER));
 
                 // 구매자 실적 정보 (구매액과 리뷰 수 표시)
                 String performance = String.format("₩%,d\n(%d개 리뷰)",
@@ -291,9 +309,12 @@ public class PdfGeneratorService {
                         .setTextAlignment(TextAlignment.RIGHT));
             } else {
                 // 데이터가 없는 경우 빈 셀
-                table.addCell(new Cell().add(new Paragraph("-")));
-                table.addCell(new Cell().add(new Paragraph("-")));
-                table.addCell(new Cell().add(new Paragraph("-")));
+                table.addCell(new Cell().add(new Paragraph("-"))
+                        .setTextAlignment(TextAlignment.CENTER));
+                table.addCell(new Cell().add(new Paragraph("-"))
+                        .setTextAlignment(TextAlignment.CENTER));
+                table.addCell(new Cell().add(new Paragraph("-"))
+                        .setTextAlignment(TextAlignment.CENTER));
             }
         }
 

@@ -20,20 +20,8 @@ public class MemberMetricsResponse {
     private String shopImage;
     private boolean sellerRequested;    // seller_application 여부
     private Long activeCouponCount;     // 사용가능한 쿠폰 수
-    private int monthlySales;           // 월 매출
+    private int monthlySales;           // 월 매출(셀러용)
     private int reviewCount;            // 리뷰 수
-    private int monthlyPurchase;        // 월 구매량
+    private int monthlyPurchase;        // 월 구매량(유저용)
 
-    public static MemberMetricsResponse from(MemberDetailDTO member) {
-        return MemberMetricsResponse.builder()
-                .email(member.getEmail())
-                .phone(member.getPhone())
-                .nickName(member.getNickName())
-                .profileImage(member.getProfileImage())
-                .roleName(member.getRoleName())
-                .shopId(member.getShopId())
-                .shopImage(member.getShopImage())
-                .activeCouponCount(member.getActiveCouponCount())
-                .build();
-    }
 }
