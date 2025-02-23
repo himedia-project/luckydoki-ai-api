@@ -1,5 +1,6 @@
 package com.himedia.luckydokiaiapi.domain.report.service;
 
+import com.himedia.luckydokiaiapi.domain.ai.service.OpenAiService;
 import com.himedia.luckydokiaiapi.domain.report.dto.ReportGenerationRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,60 +12,48 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class ReportService {
-    //    private final OpenAiService openAiService;
+    private final OpenAiService openAiService;
     private final PdfGeneratorService pdfGeneratorService;
 
     public String generateMonthlyReport(ReportGenerationRequest request) {
         // 1. OpenAI API를 통한 리포트 텍스트 생성
-//        String reportContent = generateReportContent(request);
-        String reportContent = createPromptFromMetrics(request);
+        String aiReportContent = openAiService.call(this.createPromptFromMetrics(request));
 
         // 2. PDF 생성
-        return pdfGeneratorService.generatePdfReport(reportContent, request);
+        return pdfGeneratorService.generatePdfReport(aiReportContent, request);
     }
 
-//    private String generateReportContent(ReportGenerationRequest request) {
-//        String prompt = createPromptFromMetrics(request);
-//
-//        ChatCompletionRequest chatRequest = ChatCompletionRequest.builder()
-//                .messages(Arrays.asList(
-//                        new ChatMessage("system", "You are a professional business analyst. Create a detailed monthly report in Korean."),
-//                        new ChatMessage("user", prompt)
-//                ))
-//                .build();
-//
-//        return openAiService.createChatCompletion(chatRequest)
-//                .getChoices().get(0).getMessage().getContent();
-//    }
 
     private String createPromptFromMetrics(ReportGenerationRequest request) {
         return String.format("""
-            Create a detailed monthly business report with the following metrics:
-            
-            Period: %s ~ %s
-            
-            1. Customer Growth:
-            - New Members: %d
-            
-            2. Sales Performance:
-            - Total Orders: %d
-            - Revenue: ₩%d
-            
-            3. Top 10 Products:
-            %s
-            
-            4. Community Engagement:
-            - Total Posts: %d
-            
-            5. Top Performers:
-            - Top 5 Sellers: %s
-            - Top 5 Consumers: %s
-            
-            Please analyze these metrics and provide:
-            1. Executive Summary
-            2. Detailed Analysis for each category
-            3. Key Insights and Recommendations
-            """,
+                        Please create a detailed monthly business report in Korean language with the following metrics:
+                        
+                        기간: %s ~ %s
+                        
+                        1. 고객 성장:
+                        - 신규 회원: %d명
+                        
+                        2. 매출 실적:
+                        - 총 주문 수: %d건
+                        - 매출액: ₩%d
+                        
+                        3. 인기 상품 TOP 10:
+                        %s
+                        
+                        4. 커뮤니티 참여:
+                        - 총 게시글: %d개
+                        
+                        5. 우수 회원:
+                        - TOP 5 판매자: %s
+                        - TOP 5 구매자: %s
+                        
+                        Please analyze these metrics and provide in Korean:
+                        1. 주요 요약
+                        2. 각 항목별 상세 분석
+                        3. 주요 인사이트 및 제안사항
+                        
+                        Note: Please write the entire report in Korean language.
+                        """,
                 request.getStartDate(), request.getEndDate(),
                 request.getMetrics().getNewMemberCount(),
                 request.getMetrics().getTotalOrderCount(),
