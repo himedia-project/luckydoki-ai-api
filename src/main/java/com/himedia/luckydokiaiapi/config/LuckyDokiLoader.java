@@ -74,7 +74,7 @@ public class LuckyDokiLoader {
                 Document document = new Document(productInfo, metadata);
                 List<Document> splittedDocs = textSplitter.split(document);
                 
-                log.info("Processing product: {}", product.getName());
+                log.info("Processing id : {}, product:  {}",product.getId(), product.getName());
                 vectorStore.add(splittedDocs);
                 
                 Thread.sleep(100); // Rate limiting
