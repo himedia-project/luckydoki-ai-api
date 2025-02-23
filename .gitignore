@@ -44,3 +44,4 @@ out/
 # Firebase service account file
 src/main/resources/firebase-service-account.json
 /src/main/resources/reports/
+/src/main/resources/static/uploads/
