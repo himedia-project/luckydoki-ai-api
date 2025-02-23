@@ -36,3 +36,7 @@ spring:
 
 upload:
   path: src/main/resources/static/uploads/
+
+api:
+  product:
+    url: http://localhost:8080
