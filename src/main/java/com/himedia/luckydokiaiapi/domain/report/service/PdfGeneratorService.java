@@ -278,7 +278,7 @@ public class PdfGeneratorService {
                 MemberMetricsResponse seller = sellers.get(i);
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(i + 1)))
                         .setTextAlignment(TextAlignment.CENTER));
-                table.addCell(new Cell().add(new Paragraph(seller.getNickName()))
+                table.addCell(new Cell().add(new Paragraph(seller.getNickName() != null ? seller.getNickName() : "-"))
                         .setTextAlignment(TextAlignment.CENTER));
                 table.addCell(new Cell().add(new Paragraph(String.format("₩%,d", seller.getMonthlySales())))
                         .setTextAlignment(TextAlignment.RIGHT));
@@ -298,13 +298,14 @@ public class PdfGeneratorService {
                 MemberMetricsResponse consumer = consumers.get(i);
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(i + 1)))
                         .setTextAlignment(TextAlignment.CENTER));
-                table.addCell(new Cell().add(new Paragraph(consumer.getNickName()))
+                table.addCell(new Cell().add(new Paragraph(consumer.getNickName() != null ? consumer.getNickName() : "-"))
                         .setTextAlignment(TextAlignment.CENTER));
 
                 // 구매자 실적 정보 (구매액과 리뷰 수 표시)
-                String performance = String.format("₩%,d\n(%d개 리뷰)",
-                        consumer.getMonthlyPurchase(),
-                        consumer.getReviewCount());
+                int purchase = consumer.getMonthlyPurchase();
+                int reviews = consumer.getReviewCount();
+                String performance = String.format("₩%,d\n(%d개 리뷰)", purchase, reviews);
+
                 table.addCell(new Cell().add(new Paragraph(performance))
                         .setTextAlignment(TextAlignment.RIGHT));
             } else {
