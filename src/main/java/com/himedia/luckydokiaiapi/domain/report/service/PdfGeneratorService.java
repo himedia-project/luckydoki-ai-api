@@ -31,6 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
@@ -47,6 +50,7 @@ public class PdfGeneratorService {
 
     private static final DeviceRgb PRIMARY_COLOR = new DeviceRgb(0, 222, 144);
     private static final String FONT_PATH = "static/fonts/NanumGothic.ttf";
+
 
     // 각 PDF 생성 시마다 새 PdfFont 인스턴스를 생성하기 위한 메서드
     private PdfFont createLocalKoreanFont() throws IOException {
@@ -73,14 +77,38 @@ public class PdfGeneratorService {
      */
     public String generatePdfReport(String aiAnalysis, ReportGenerationRequest request, Map<String, Object> salesGraphResult) {
         log.info("PDF 리포트 생성 요청 start...");
+
         // 고유 파일명 생성 (날짜 + 밀리초)
         String filename = FileNameUtil.generateMonthlyReportFileName(LocalDate.now());
-        String filePath = uploads + File.separator + filename;
+        String filePath = uploads + "/" + filename;
 
-        try {
-            PdfWriter writer = new PdfWriter(filePath);
-            PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf);
+        // 업로드 디렉토리 생성
+        Path uploadPath = Path.of(filePath);
+        if (Files.notExists(uploadPath)) {
+            log.info("upload 디렉토리 생성: {}", uploadPath);
+            try {
+                Files.createDirectories(uploadPath);
+            } catch (IOException e) {
+                log.error("upload 디렉토리 생성 실패", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        // 기존 파일이 있으면 삭제
+        if(Files.exists(uploadPath)) {
+            log.info("기존 리포트 파일 삭제: {}", filePath);
+            try {
+                Files.delete(uploadPath);
+            } catch (IOException e) {
+                log.error("기존 리포트 파일 삭제 실패", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        // try ~ with 로 자원 해제
+        try (PdfWriter writer = new PdfWriter(filePath);
+             PdfDocument pdf = new PdfDocument(writer);
+             Document document = new Document(pdf)) {
 
             // 매번 새 PdfFont 인스턴스 생성
             PdfFont localKoreanFont = createLocalKoreanFont();
@@ -101,8 +129,8 @@ public class PdfGeneratorService {
             // 판매 그래프 추가
             addSalesGraphs(document, salesGraphResult);
 
-            document.close();
             return filePath;
+
         } catch (IOException e) {
             log.error("PDF 생성 중 오류 발생", e);
             throw new RuntimeException("PDF 생성 실패", e);

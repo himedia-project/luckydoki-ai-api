@@ -38,7 +38,7 @@ spring:
 
 
 upload:
-  path: src/main/resources/static/uploads/
+  path: static/uploads
 
 api:
   product:
