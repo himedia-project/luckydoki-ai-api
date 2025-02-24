@@ -80,33 +80,34 @@ public class PdfGeneratorService {
 
         // 고유 파일명 생성 (날짜 + 밀리초)
         String filename = FileNameUtil.generateMonthlyReportFileName(LocalDate.now());
-        String filePath = uploads + "/" + filename;
-
-        // 업로드 디렉토리 생성
-        Path uploadPath = Path.of(filePath);
-        if (Files.notExists(uploadPath)) {
-            log.info("upload 디렉토리 생성: {}", uploadPath);
+        // OS에 독립적인 경로 생성
+        // Windows와 Linux의 경로 구분자가 다름 (Windows는 \, Linux는 /)
+        // resolve() 메서드는 OS에 맞는 올바른 구분자를 자동으로 사용
+        Path uploadPath = Paths.get(uploads).resolve(filename);
+        
+        // 상위 디렉토리 생성 (파일의 상위 디렉토리만 생성)
+        Path parentDir = uploadPath.getParent();
+        if (parentDir != null && Files.notExists(parentDir)) {
+            log.info("upload 디렉토리 생성: {}", parentDir);
             try {
-                Files.createDirectories(uploadPath);
+                Files.createDirectories(parentDir);
             } catch (IOException e) {
                 log.error("upload 디렉토리 생성 실패", e);
-                throw new RuntimeException(e);
+                throw new RuntimeException("디렉토리 생성 실패: " + e.getMessage(), e);
             }
         }
 
         // 기존 파일이 있으면 삭제
-        if(Files.exists(uploadPath)) {
-            log.info("기존 리포트 파일 삭제: {}", filePath);
-            try {
-                Files.delete(uploadPath);
-            } catch (IOException e) {
-                log.error("기존 리포트 파일 삭제 실패", e);
-                throw new RuntimeException(e);
-            }
+        try {
+            Files.deleteIfExists(uploadPath);
+            log.info("기존 리포트 파일 삭제 완료: {}", uploadPath);
+        } catch (IOException e) {
+            log.error("기존 리포트 파일 삭제 실패: {}", uploadPath, e);
+            throw new RuntimeException("파일 삭제 실패: " + e.getMessage(), e);
         }
 
         // try ~ with 로 자원 해제
-        try (PdfWriter writer = new PdfWriter(filePath);
+        try (PdfWriter writer = new PdfWriter(uploadPath.toString());
              PdfDocument pdf = new PdfDocument(writer);
              Document document = new Document(pdf)) {
 
@@ -129,7 +130,7 @@ public class PdfGeneratorService {
             // 판매 그래프 추가
             addSalesGraphs(document, salesGraphResult);
 
-            return filePath;
+            return uploadPath.toString();
 
         } catch (IOException e) {
             log.error("PDF 생성 중 오류 발생", e);
