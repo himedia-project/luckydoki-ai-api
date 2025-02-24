@@ -31,7 +31,7 @@ spring:
         table-name : mall_vector  # movie_vector hotel_vector mall_vector
         initialize-schema: true
     openai:
-      api-key: ${OPENAI_API_KEY}
+      api-key: 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
       chat:
         options:
           model: "gpt-4o"
