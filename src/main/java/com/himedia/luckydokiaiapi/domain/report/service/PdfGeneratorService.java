@@ -88,11 +88,11 @@ public class PdfGeneratorService {
             // AI 분석 결과 추가
             addAiAnalysis(document, aiAnalysis);
 
-            // 판매 그래프 추가
-            addSalesGraphs(document, salesGraphResult);
-
             // 상세 데이터 테이블 추가
             addDetailedTables(document, request.getMetrics(), localKoreanFont);
+
+            // 판매 그래프 추가
+            addSalesGraphs(document, salesGraphResult);
 
             document.close();
             return filePath;
@@ -161,6 +161,9 @@ public class PdfGeneratorService {
         }
     }
 
+    private static final float IMAGE_MAX_WIDTH = 500f;
+    private static final float IMAGE_MAX_HEIGHT = 300f;
+
     private void addSalesGraphs(Document document, Map<String, Object> salesGraphResult) {
         if (salesGraphResult != null) {
             String dailyImageBase64 = (String) salesGraphResult.get("daily_image_base64");
@@ -174,7 +177,7 @@ public class PdfGeneratorService {
                 byte[] dailyImageBytesCopy = java.util.Arrays.copyOf(dailyImageBytes, dailyImageBytes.length);
                 ImageData dailyImageData = ImageDataFactory.create(dailyImageBytesCopy);
                 Image dailyImage = new Image(dailyImageData);
-                dailyImage.setAutoScale(true);
+                dailyImage.scaleToFit(IMAGE_MAX_WIDTH, IMAGE_MAX_HEIGHT);
                 document.add(new Paragraph("일별 매출 그래프").setFontSize(14).setBold());
                 document.add(dailyImage);
                 document.add(new Paragraph("\n"));
@@ -185,7 +188,7 @@ public class PdfGeneratorService {
                 byte[] hourlyImageBytesCopy = java.util.Arrays.copyOf(hourlyImageBytes, hourlyImageBytes.length);
                 ImageData hourlyImageData = ImageDataFactory.create(hourlyImageBytesCopy);
                 Image hourlyImage = new Image(hourlyImageData);
-                hourlyImage.setAutoScale(true);
+                hourlyImage.scaleToFit(IMAGE_MAX_WIDTH, IMAGE_MAX_HEIGHT);
                 document.add(new Paragraph("시간별 매출 그래프").setFontSize(14).setBold());
                 document.add(hourlyImage);
                 document.add(new Paragraph("\n"));
