@@ -1,11 +1,24 @@
 package com.himedia.luckydokiaiapi.domain.report.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.himedia.luckydokiaiapi.domain.ai.service.OpenAiService;
 import com.himedia.luckydokiaiapi.domain.report.dto.MemberMetricsResponse;
 import com.himedia.luckydokiaiapi.domain.report.dto.ProductMetricsResponse;
 import com.himedia.luckydokiaiapi.domain.report.dto.ReportGenerationRequest;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +37,11 @@ public class ReportService {
         // 1. OpenAI API를 통한 리포트 텍스트 생성
         String aiReportContent = openAiService.call(this.createPromptFromMetrics(request));
         log.info("AI Report Content: success! ");
-        // 2. PDF 생성
-        return pdfGeneratorService.generatePdfReport(aiReportContent, request);
+        // 2. 판매 그래프 결과 생성 (파이썬 스크립트 호출 등)
+        Map<String, Object> salesGraphResult = generateSalesGraphs(request);
+
+        // 3. PDF 생성 (판매 그래프 결과 포함)
+        return pdfGeneratorService.generatePdfReport(aiReportContent, request, salesGraphResult);
     }
 
 
@@ -142,5 +158,83 @@ public class ReportService {
                     m.getMonthlySales() != 0 ? m.getMonthlySales() : 0));
         }
         return sb.toString();
+    }
+
+    private Map<String, Object> generateSalesGraphs(ReportGenerationRequest request) {
+        try {
+            // 파이썬 스크립트로 보낼 JSON 구성 (예: dailySalesData와 hourlySalesData 포함)
+            // ReportGenerationRequest에 판매 데이터가 포함되어 있어야 합니다.
+            Map<String, Object> pythonPayload = new HashMap<>();
+            pythonPayload.put("salesData", request.getDailySalesData());
+
+            // 예시로, hourlySalesData 중 첫 번째의 날짜를 selectedDate로 사용
+            String selectedDate = "";
+            if (request.getHourlySalesData() != null && !request.getHourlySalesData().isEmpty()) {
+                selectedDate = request.getHourlySalesData().get(0).getDate().format(
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            }
+            pythonPayload.put("selectedDate", selectedDate);
+
+            // JSON 직렬화
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+            objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            String jsonData = objectMapper.writeValueAsString(pythonPayload);
+
+            // 파이썬 스크립트 실행 (sales_forecast.py가 classpath의 python 폴더에 있다고 가정)
+            ClassPathResource resource = new ClassPathResource("python/sales_forecast.py");
+            File tempScriptFile = File.createTempFile("sales_forecast", ".py");
+            tempScriptFile.deleteOnExit();
+            try (InputStream is = resource.getInputStream();
+                FileOutputStream fos = new FileOutputStream(tempScriptFile)) {
+                org.springframework.util.StreamUtils.copy(is, fos);
+            }
+
+            ProcessBuilder processBuilder = new ProcessBuilder("python", tempScriptFile.getAbsolutePath());
+            processBuilder.redirectErrorStream(false);
+            Process process = processBuilder.start();
+
+            try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8))) {
+                writer.write(jsonData);
+                writer.flush();
+            }
+
+            StringBuilder outBuilder = new StringBuilder();
+            try (BufferedReader stdOut = new BufferedReader(
+                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = stdOut.readLine()) != null) {
+                    outBuilder.append(line);
+                }
+            }
+
+            StringBuilder errBuilder = new StringBuilder();
+            try (BufferedReader stdErr = new BufferedReader(
+                new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = stdErr.readLine()) != null) {
+                    errBuilder.append(line).append("\n");
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new RuntimeException("Python script exited with code " + exitCode
+                    + "\n" + errBuilder.toString());
+            }
+
+            String output = outBuilder.toString().trim();
+            if (output.isEmpty()) {
+                throw new RuntimeException("Python script returned no output");
+            }
+
+            // 파이썬 스크립트 결과 JSON 파싱
+            Map<String, Object> result = objectMapper.readValue(output, Map.class);
+            return result;
+        } catch (Exception e) {
+            log.error("Error generating sales graphs: ", e);
+            throw new RuntimeException("Sales graph generation failed: " + e.getMessage(), e);
+        }
     }
 }
