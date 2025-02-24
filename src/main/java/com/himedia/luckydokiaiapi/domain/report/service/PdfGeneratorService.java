@@ -4,6 +4,7 @@ import com.himedia.luckydokiaiapi.domain.report.dto.DashboardMetrics;
 import com.himedia.luckydokiaiapi.domain.report.dto.MemberMetricsResponse;
 import com.himedia.luckydokiaiapi.domain.report.dto.ProductMetricsResponse;
 import com.himedia.luckydokiaiapi.domain.report.dto.ReportGenerationRequest;
+import com.himedia.luckydokiaiapi.util.FileNameUtil;
 import com.itextpdf.io.font.FontProgram;
 import com.itextpdf.io.font.FontProgramFactory;
 import com.itextpdf.io.font.PdfEncodings;
@@ -22,7 +23,11 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
-import java.io.ByteArrayInputStream;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,10 +36,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -63,12 +64,18 @@ public class PdfGeneratorService {
         }
     }
 
+    /**
+     * PDF 리포트 생성
+     * @param aiAnalysis AI 분석 결과
+     * @param request 리포트 생성 요청
+     * @param salesGraphResult 판매 그래프(python) 결과
+     * @return 생성된 PDF 파일 경로
+     */
     public String generatePdfReport(String aiAnalysis, ReportGenerationRequest request, Map<String, Object> salesGraphResult) {
         log.info("PDF 리포트 생성 요청 start...");
         // 고유 파일명 생성 (날짜 + 밀리초)
-        String fileName = String.format("monthly-ai-report-%s.pdf",
-            LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM")));
-        String filePath = uploads + File.separator + fileName;
+        String filename = FileNameUtil.generateMonthlyReportFileName(LocalDate.now());
+        String filePath = uploads + File.separator + filename;
 
         try {
             PdfWriter writer = new PdfWriter(filePath);

@@ -45,6 +45,11 @@ public class ReportService {
     }
 
 
+    /**
+     * 리포트 생성을 위한 AI Prompt 생성
+     * @param request 리포트 생성 요청
+     * @return AI Prompt
+     */
     private String createPromptFromMetrics(ReportGenerationRequest request) {
         return String.format("""
                 Please create a detailed monthly business report in Korean language with the following metrics:

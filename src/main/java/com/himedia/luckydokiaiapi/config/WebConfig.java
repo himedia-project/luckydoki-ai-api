@@ -14,6 +14,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:3000", "http://localhost:3001")    // 허용할 출처: 리액트 url 주소
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS") // OPTIONS 추가: preflight 요청 허용
                 .allowedHeaders("*")        // 모든 header 허용
+                // content-disposition 허용 설정 -> excel,pdf 파일 다운로드시, 제목노출을 위해 필요!
+                .exposedHeaders("Content-Disposition")
                 .allowCredentials(true);    // 쿠키를 주고 받을 수 있게 설정
 
     }

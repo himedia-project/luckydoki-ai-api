@@ -2,6 +2,7 @@ package com.himedia.luckydokiaiapi.domain.report.controller;
 
 import com.himedia.luckydokiaiapi.domain.report.dto.ReportGenerationRequest;
 import com.himedia.luckydokiaiapi.domain.report.service.ReportService;
+import com.himedia.luckydokiaiapi.util.FileNameUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @RestController
@@ -37,12 +37,11 @@ public class AdminReportController {
             Resource resource = new FileSystemResource(new File(pdfPath));
 
             // 파일명 설정
-            String fileName = String.format("monthly-report-%s.pdf",
-                    LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM")));
+            String filename = FileNameUtil.generateMonthlyReportFileName(LocalDate.now());
 
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_PDF)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                     .body(resource);
 
         } catch (Exception e) {
