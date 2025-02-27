@@ -42,4 +42,4 @@ upload:
 
 api:
   product:
-    url: http://localhost:8080
+    url: ${API_URL}
