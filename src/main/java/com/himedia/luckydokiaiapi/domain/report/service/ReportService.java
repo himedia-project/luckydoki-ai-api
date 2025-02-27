@@ -195,7 +195,7 @@ public class ReportService {
                 org.springframework.util.StreamUtils.copy(is, fos);
             }
 
-            ProcessBuilder processBuilder = new ProcessBuilder("python", tempScriptFile.getAbsolutePath());
+            ProcessBuilder processBuilder = new ProcessBuilder("python3", tempScriptFile.getAbsolutePath());
             processBuilder.redirectErrorStream(false);
             Process process = processBuilder.start();
 
