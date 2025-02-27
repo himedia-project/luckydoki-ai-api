@@ -29,12 +29,6 @@ def generate_daily_sales_plot(df, unit="원"):
     return base64.b64encode(buffer.read()).decode("utf-8")
 
 def generate_hourly_sales_plot(df, unit="원", selected_date=None):
-    if selected_date:
-        selected_date_parsed = pd.to_datetime(selected_date).date()
-        df = df[df.index.date == selected_date_parsed]
-        if df.empty:
-            raise Exception(f"No data found for selected date: {selected_date}")
-
     df['hour'] = df.index.hour
     hourly_sales = df.groupby('hour')['totalSales'].sum()
 
@@ -42,8 +36,7 @@ def generate_hourly_sales_plot(df, unit="원", selected_date=None):
     plt.plot(hourly_sales.index, hourly_sales.values, marker='o', linestyle='-')
     plt.xlabel("Hour of the Day")
     plt.ylabel(f"Total Sales ({unit})")
-    title = f"{selected_date} 시간 별 판매 추세" if selected_date else "시간 별 판매 추세"
-    plt.title(title)
+    plt.title("시간 별 판매 추세")
     plt.xticks(range(0, 24))
     plt.grid()
     from matplotlib.ticker import StrMethodFormatter
