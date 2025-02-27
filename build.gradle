@@ -62,3 +62,20 @@ dependencyManagement {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+
+// plain - jar 생략
+jar {
+    enabled = false
+}
+
+// bootJar - 중복 제거
+tasks.named('bootJar') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// bootWar - 중복 제거
+tasks.named('jar') {
+    enabled = false
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
