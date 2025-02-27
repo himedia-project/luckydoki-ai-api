@@ -43,7 +43,8 @@ public class ProductDTO {
 
         @Builder.Default
         private List<String> uploadFileNames = new ArrayList<>();
-        private List<String> tagStrList;
+        @Builder.Default
+        private List<String> tagStrList = new ArrayList<>();
         private String createdAt;
         private String modifiedAt;
         private Boolean likes;
