@@ -1,0 +1,11 @@
+# docker-compose yml로 database 생성후, 실행해야 합니다.
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS hstore;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE TABLE IF NOT EXISTS mall_vector(
+                                          id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+                                          content text,
+                                          metadata json,
+                                          embedding vector(1536)
+);
+CREATE INDEX ON mall_vector USING HNSW (embedding vector_cosine_ops);
