@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 
-plt.rcParams["font.family"] = "Malgun Gothic"
+plt.rcParams["font.family"] = "Nanum Gothic"
 
 def generate_daily_sales_plot(df, unit="원"):
     daily_sales = df['totalSales'].resample('D').sum()
