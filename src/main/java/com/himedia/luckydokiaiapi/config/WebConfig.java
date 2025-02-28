@@ -15,7 +15,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://15.165.150.61:3000", "http://15.165.150.61:3001",
                         "http://luckydokiai.shop:3000", "http://luckydokiai.shop:3001",
                         "http://luckydokiai.shop", "https://luckydokiai.shop",
-                        "http://www.luckydokiai.shop", "https://www.luckydokiai.shop"
+                        "http://www.luckydokiai.shop", "https://www.luckydokiai.shop",
+                        "https://luckydokiai.shop/", "https://www.luckydokiai.shop/"
                 )    // 허용할 출처: 리액트 url 주소
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS") // OPTIONS 추가: preflight 요청 허용
                 .allowedHeaders("*")        // 모든 header 허용
