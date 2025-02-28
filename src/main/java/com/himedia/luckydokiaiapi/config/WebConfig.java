@@ -16,7 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://luckydoki.shop:3000", "http://luckydoki.shop:3001",
                         "http://luckydoki.shop", "https://luckydoki.shop",
                         "http://www.luckydoki.shop", "https://www.luckydoki.shop",
-                        "http://admin.luckydoki.shop", "https://admin.luckydoki.shop",
+                        "http://admin.luckydoki.shop", "https://admin.luckydoki.shop", "https://www.admin.luckydoki.shop",
                         "https://luckydoki.shop/", "https://www.luckydoki.shop/",
                         "https://api.ai.luckydoki.shop", "https://www.api.ai.luckydoki.shop", "https://www.api.ai.luckydoki.shop/"
                 )    // 허용할 출처: 리액트 url 주소
