@@ -12,7 +12,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry
                 .addMapping("/**")  // 모든 요청에 대해 CORS 허용
                 .allowedOrigins("http://localhost:3000", "http://localhost:3001",
-                        "http://15.165.150.61:3000", "http://15.165.150.61:3001"
+                        "http://15.165.150.61:3000", "http://15.165.150.61:3001",
+                        "http://luckydokiai.shop:3000", "http://luckydokiai.shop:3001"
                 )    // 허용할 출처: 리액트 url 주소
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS") // OPTIONS 추가: preflight 요청 허용
                 .allowedHeaders("*")        // 모든 header 허용
