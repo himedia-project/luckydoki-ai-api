@@ -70,8 +70,9 @@ public class PdfGeneratorService {
 
     /**
      * PDF 리포트 생성
-     * @param aiAnalysis AI 분석 결과
-     * @param request 리포트 생성 요청
+     *
+     * @param aiAnalysis       AI 분석 결과
+     * @param request          리포트 생성 요청
      * @param salesGraphResult 판매 그래프(python) 결과
      * @return 생성된 PDF 파일 경로
      */
@@ -84,7 +85,7 @@ public class PdfGeneratorService {
         // Windows와 Linux의 경로 구분자가 다름 (Windows는 \, Linux는 /)
         // resolve() 메서드는 OS에 맞는 올바른 구분자를 자동으로 사용
         Path uploadPath = Paths.get(uploads).resolve(filename);
-        
+
         // 상위 디렉토리 생성 (파일의 상위 디렉토리만 생성)
         Path parentDir = uploadPath.getParent();
         if (parentDir != null && Files.notExists(parentDir)) {
@@ -140,18 +141,18 @@ public class PdfGeneratorService {
 
     private void addHeader(Document document, LocalDate startDate, LocalDate endDate, PdfFont font) {
         Paragraph title = new Paragraph("월간 리포트")
-            .setFont(font)
-            .setFontSize(24)
-            .setFontColor(PRIMARY_COLOR)
-            .setBold()
-            .setTextAlignment(TextAlignment.CENTER);
+                .setFont(font)
+                .setFontSize(24)
+                .setFontColor(PRIMARY_COLOR)
+                .setBold()
+                .setTextAlignment(TextAlignment.CENTER);
         document.add(title);
         Paragraph period = new Paragraph(String.format("기간: %s ~ %s",
-            startDate.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")),
-            endDate.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))))
-            .setFontSize(12)
-            .setTextAlignment(TextAlignment.CENTER)
-            .setMarginBottom(30);
+                startDate.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")),
+                endDate.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))))
+                .setFontSize(12)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMarginBottom(30);
         document.add(period);
     }
 
@@ -168,30 +169,30 @@ public class PdfGeneratorService {
 
     private void addMetricCell(Table table, String label, String value) {
         Cell labelCell = new Cell().add(new Paragraph(label))
-            .setFontSize(11)
-            .setFontColor(ColorConstants.GRAY);
+                .setFontSize(11)
+                .setFontColor(ColorConstants.GRAY);
         Cell valueCell = new Cell().add(new Paragraph(value))
-            .setFontSize(14)
-            .setBold()
-            .setFontColor(PRIMARY_COLOR);
+                .setFontSize(14)
+                .setBold()
+                .setFontColor(PRIMARY_COLOR);
         table.addCell(labelCell);
         table.addCell(valueCell);
     }
 
     private void addAiAnalysis(Document document, String aiAnalysis) {
         Paragraph analysisTitle = new Paragraph("AI 분석 리포트")
-            .setFontSize(18)
-            .setFontColor(PRIMARY_COLOR)
-            .setBold()
-            .setMarginTop(30)
-            .setMarginBottom(20);
+                .setFontSize(18)
+                .setFontColor(PRIMARY_COLOR)
+                .setBold()
+                .setMarginTop(30)
+                .setMarginBottom(20);
         document.add(analysisTitle);
         String[] sections = aiAnalysis.split("\n\n");
         for (String section : sections) {
             if (!section.trim().isEmpty()) {
                 Paragraph p = new Paragraph(section)
-                    .setFontSize(11)
-                    .setMarginBottom(10);
+                        .setFontSize(11)
+                        .setMarginBottom(10);
                 document.add(p);
             }
         }
@@ -214,7 +215,11 @@ public class PdfGeneratorService {
                 ImageData dailyImageData = ImageDataFactory.create(dailyImageBytesCopy);
                 Image dailyImage = new Image(dailyImageData);
                 dailyImage.scaleToFit(IMAGE_MAX_WIDTH, IMAGE_MAX_HEIGHT);
-                document.add(new Paragraph("일별 매출 그래프").setFontSize(14).setBold());
+                document.add(new Paragraph("일별 매출 그래프")
+                        .setFontSize(14)
+                        .setBold()
+                        .setTextAlignment(TextAlignment.CENTER)
+                );
                 // 이미지 중앙 정렬
                 dailyImage.setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.CENTER);
                 document.add(dailyImage);
@@ -227,7 +232,12 @@ public class PdfGeneratorService {
                 ImageData hourlyImageData = ImageDataFactory.create(hourlyImageBytesCopy);
                 Image hourlyImage = new Image(hourlyImageData);
                 hourlyImage.scaleToFit(IMAGE_MAX_WIDTH, IMAGE_MAX_HEIGHT);
-                document.add(new Paragraph("시간별 매출 그래프").setFontSize(14).setBold());
+                document.add(new Paragraph("시간별 매출 그래프")
+                        .setFontSize(14)
+                        .setBold()
+                        .setTextAlignment(TextAlignment.CENTER)
+                );
+                // 이미지 중앙 정렬
                 hourlyImage.setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.CENTER);
                 document.add(hourlyImage);
                 document.add(new Paragraph("\n"));
@@ -237,21 +247,21 @@ public class PdfGeneratorService {
 
     private void addDetailedTables(Document document, DashboardMetrics metrics, PdfFont font) {
         Paragraph prodTitle = new Paragraph("인기 상품 TOP 10")
-            .setFontSize(16)
-            .setFontColor(PRIMARY_COLOR)
-            .setBold()
-            .setMarginTop(30)
-            .setMarginBottom(10);
+                .setFontSize(16)
+                .setFontColor(PRIMARY_COLOR)
+                .setBold()
+                .setMarginTop(30)
+                .setMarginBottom(10);
         document.add(prodTitle);
         Table productsTable = createProductsTable(metrics.getTop10Products(), font);
         document.add(productsTable);
 
         Paragraph performersTitle = new Paragraph("TOP 5 판매자 & 구매자")
-            .setFontSize(16)
-            .setFontColor(PRIMARY_COLOR)
-            .setBold()
-            .setMarginTop(30)
-            .setMarginBottom(10);
+                .setFontSize(16)
+                .setFontColor(PRIMARY_COLOR)
+                .setBold()
+                .setMarginTop(30)
+                .setMarginBottom(10);
         document.add(performersTitle);
         Table performersTable = createPerformersTable(metrics.getTop5Sellers(), metrics.getTop5GoodConsumers(), font);
         document.add(performersTable);
@@ -260,18 +270,18 @@ public class PdfGeneratorService {
     private void addTableHeader(Table table, String[] headers, PdfFont font) {
         for (String header : headers) {
             Cell cell = new Cell().add(new Paragraph(header).setFont(font))
-                .setFontColor(ColorConstants.GRAY)
-                .setBackgroundColor(new DeviceRgb(245, 245, 245))
-                .setBold()
-                .setTextAlignment(TextAlignment.CENTER)
-                .setFontSize(10);
+                    .setFontColor(ColorConstants.GRAY)
+                    .setBackgroundColor(new DeviceRgb(245, 245, 245))
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setFontSize(10);
             table.addCell(cell);
         }
     }
 
     private Table createProductsTable(List<ProductMetricsResponse> products, PdfFont font) {
         Table table = new Table(UnitValue.createPercentArray(new float[]{5, 15, 25, 10, 15, 10, 10, 10}))
-            .useAllAvailableWidth();
+                .useAllAvailableWidth();
         addTableHeader(table, new String[]{"순위", "카테고리", "상품명", "셀러", "가격", "판매량", "평점", "리뷰수"}, font);
         for (int i = 0; i < products.size(); i++) {
             ProductMetricsResponse product = products.get(i);
@@ -285,28 +295,28 @@ public class PdfGeneratorService {
             table.addCell(new Cell().add(new Paragraph(String.valueOf(product.getReviewCount()))));
         }
         table.setFontSize(9)
-            .setTextAlignment(TextAlignment.CENTER)
-            .setMarginTop(10)
-            .setMarginBottom(20);
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMarginTop(10)
+                .setMarginBottom(20);
         return table;
     }
 
     private Table createPerformersTable(List<MemberMetricsResponse> sellers, List<MemberMetricsResponse> consumers, PdfFont font) {
         Table table = new Table(UnitValue.createPercentArray(new float[]{5, 25, 20, 5, 25, 20}))
-            .useAllAvailableWidth();
+                .useAllAvailableWidth();
 
         Cell sellerHeader = new Cell(1, 3)
-            .add(new Paragraph("판매자 TOP 5").setFont(font))
-            .setFontColor(ColorConstants.WHITE)
-            .setBackgroundColor(PRIMARY_COLOR)
-            .setBold()
-            .setTextAlignment(TextAlignment.CENTER);
+                .add(new Paragraph("판매자 TOP 5").setFont(font))
+                .setFontColor(ColorConstants.WHITE)
+                .setBackgroundColor(PRIMARY_COLOR)
+                .setBold()
+                .setTextAlignment(TextAlignment.CENTER);
         Cell consumerHeader = new Cell(1, 3)
-            .add(new Paragraph("구매자 TOP 5").setFont(font))
-            .setFontColor(ColorConstants.WHITE)
-            .setBackgroundColor(PRIMARY_COLOR)
-            .setBold()
-            .setTextAlignment(TextAlignment.CENTER);
+                .add(new Paragraph("구매자 TOP 5").setFont(font))
+                .setFontColor(ColorConstants.WHITE)
+                .setBackgroundColor(PRIMARY_COLOR)
+                .setBold()
+                .setTextAlignment(TextAlignment.CENTER);
         table.addHeaderCell(sellerHeader);
         table.addHeaderCell(consumerHeader);
         addTableHeader(table, new String[]{"순위", "닉네임", "판매실적", "순위", "닉네임", "구매실적"}, font);
@@ -327,8 +337,8 @@ public class PdfGeneratorService {
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(i + 1))).setTextAlignment(TextAlignment.CENTER));
                 table.addCell(new Cell().add(new Paragraph(consumer.getNickName())).setTextAlignment(TextAlignment.CENTER));
                 String performance = String.format("₩%,d\n(%d개 리뷰)",
-                    consumer.getMonthlyPurchase(),
-                    consumer.getReviewCount());
+                        consumer.getMonthlyPurchase(),
+                        consumer.getReviewCount());
                 table.addCell(new Cell().add(new Paragraph(performance)).setTextAlignment(TextAlignment.RIGHT));
             } else {
                 table.addCell(new Cell().add(new Paragraph("-")).setTextAlignment(TextAlignment.CENTER));
@@ -337,8 +347,8 @@ public class PdfGeneratorService {
             }
         }
         table.setFontSize(10)
-            .setMarginTop(10)
-            .setMarginBottom(20);
+                .setMarginTop(10)
+                .setMarginBottom(20);
         return table;
     }
 }
