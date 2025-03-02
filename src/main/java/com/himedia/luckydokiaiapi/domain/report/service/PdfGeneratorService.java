@@ -215,6 +215,8 @@ public class PdfGeneratorService {
                 Image dailyImage = new Image(dailyImageData);
                 dailyImage.scaleToFit(IMAGE_MAX_WIDTH, IMAGE_MAX_HEIGHT);
                 document.add(new Paragraph("일별 매출 그래프").setFontSize(14).setBold());
+                // 이미지 중앙 정렬
+                dailyImage.setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.CENTER);
                 document.add(dailyImage);
                 document.add(new Paragraph("\n"));
             }
@@ -226,6 +228,7 @@ public class PdfGeneratorService {
                 Image hourlyImage = new Image(hourlyImageData);
                 hourlyImage.scaleToFit(IMAGE_MAX_WIDTH, IMAGE_MAX_HEIGHT);
                 document.add(new Paragraph("시간별 매출 그래프").setFontSize(14).setBold());
+                hourlyImage.setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.CENTER);
                 document.add(hourlyImage);
                 document.add(new Paragraph("\n"));
             }
