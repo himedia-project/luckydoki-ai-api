@@ -52,7 +52,9 @@ public class ReportService {
      */
     private String createPromptFromMetrics(ReportGenerationRequest request) {
         return String.format("""
-                Please create a detailed monthly business report in Korean language with the following metrics:
+                Please create a professional monthly business report in Korean language with the following metrics.
+                Format the report in a clean, modern business style WITHOUT using markdown headers (###) or bullet points (*).
+                Use simple paragraph formatting with clear section titles.
                 
                 기간: %s ~ %s
                 
@@ -78,45 +80,35 @@ public class ReportService {
                 
                 Please provide a comprehensive analysis in Korean with the following structure:
                 
-                1. 주요 요약
-                - 전반적인 비즈니스 성과 요약
-                - 주목할만한 성장 지표와 개선이 필요한 영역
+                [주요 요약]
+                전반적인 비즈니스 성과를 간결하게 요약하고, 주목할만한 성장 지표와 개선이 필요한 영역을 명확히 제시하세요.
                 
-                2. 상세 분석
-                2.1 회원 분석
-                - 신규 회원 증감 추이와 셀러 비율 분석
-                - 우수 회원들의 특징과 행동 패턴
+                [회원 분석]
+                신규 회원 증감 추이와 셀러 비율 분석, 우수 회원들의 특징과 행동 패턴을 설명하세요.
                 
-                2.2 매출 분석
-                - 주문 및 매출 추이
-                - 일평균 매출 대비 당일 매출 비교
-                - 매출 기여도가 높은 상품 카테고리
+                [매출 분석]
+                주문 및 매출 추이, 일평균 매출 대비 당일 매출 비교, 매출 기여도가 높은 상품 카테고리를 분석하세요.
                 
-                2.3 상품 분석
-                - TOP 10 상품들의 공통적 특징
-                - 높은 평가를 받은 요인 분석
-                - 가격대별 인기 상품 분포
+                [상품 분석]
+                TOP 10 상품들의 공통적 특징, 높은 평가를 받은 요인, 가격대별 인기 상품 분포를 분석하세요.
                 
-                2.4 커뮤니티 활성화 분석
-                - 게시글 참여도와 회원 활동성
-                - 우수 구매자들의 리뷰 작성 패턴
+                [커뮤니티 활성화 분석]
+                게시글 참여도와 회원 활동성, 우수 구매자들의 리뷰 작성 패턴을 분석하세요.
                 
-                3. 인사이트 및 제안사항
-                3.1 성장 기회
-                - 데이터 기반 타겟 고객층 제안
-                - 신규 셀러 유치 전략
-                - 우수 회원 특성을 활용한 마케팅 방안
+                [성장 기회]
+                데이터 기반 타겟 고객층 제안, 신규 셀러 유치 전략, 우수 회원 특성을 활용한 마케팅 방안을 제시하세요.
                 
-                3.2 개선 필요 영역
-                - 매출 증대를 위한 구체적 액션 아이템
-                - 커뮤니티 활성화 방안
-                - 리뷰 작성 독려 전략
+                [개선 필요 영역]
+                매출 증대를 위한 구체적 액션 아이템, 커뮤니티 활성화 방안, 리뷰 작성 독려 전략을 제안하세요.
                 
-                3.3 중점 추진 과제
-                - 단기 (1개월) 및 중기 (3개월) 중점 과제
-                - 우선순위별 실행 계획
+                [중점 추진 과제]
+                단기 (1개월) 및 중기 (3개월) 중점 과제, 우선순위별 실행 계획을 제시하세요.
                 
-                Note: Please write the entire report in Korean language with data-driven insights.
+                Important: 
+                1. Do NOT use markdown formatting (###, *, etc.)
+                2. Use simple paragraph formatting with clear section titles
+                3. Write the entire report in Korean language with data-driven insights
+                4. Keep the analysis concise and professional
                 """,
                 request.getStartDate(), request.getEndDate(),
                 request.getMetrics().getNewMemberCount(),
