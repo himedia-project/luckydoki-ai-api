@@ -1,7 +1,7 @@
 package com.himedia.luckydokiaiapi.domain.report.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.himedia.luckydokiaiapi.domain.ai.service.OpenAiService;
+import com.himedia.luckydokiaiapi.domain.chatbot.service.OpenAiService;
 import com.himedia.luckydokiaiapi.domain.report.dto.MemberMetricsResponse;
 import com.himedia.luckydokiaiapi.domain.report.dto.ProductMetricsResponse;
 import com.himedia.luckydokiaiapi.domain.report.dto.ReportGenerationRequest;

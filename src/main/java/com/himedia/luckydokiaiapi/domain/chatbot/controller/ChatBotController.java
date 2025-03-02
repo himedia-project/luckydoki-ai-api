@@ -1,4 +1,4 @@
-package com.himedia.luckydokiaiapi.domain.ai.controller;
+package com.himedia.luckydokiaiapi.domain.chatbot.controller;
 
 
 import lombok.RequiredArgsConstructor;
