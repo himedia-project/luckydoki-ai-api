@@ -23,8 +23,8 @@ public class LuckyDokiLoader {
     private final JdbcClient jdbcClient;
     private final RestTemplate restTemplate;
 
-    @Value("${api.product.url}")
-    private String productApiUrl;
+    @Value("${api.url}")
+    private String apiUrl;
 
     public LuckyDokiLoader(VectorStore vectorStore, JdbcClient jdbcClient, RestTemplateBuilder restTemplateBuilder) {
         this.vectorStore = vectorStore;
@@ -50,7 +50,7 @@ public class LuckyDokiLoader {
             
             // API에서 상품 정보 가져오기
             ProductDTO.Response[] products = restTemplate.getForObject(
-                    productApiUrl + "/api/product/list",
+                    apiUrl + "/api/product/list",
                     ProductDTO.Response[].class
             );
 
@@ -153,7 +153,7 @@ public class LuckyDokiLoader {
             if (productId != null) {
                 // 특정 상품만 업데이트
                 ProductDTO.Response product = restTemplate.getForObject(
-                        productApiUrl + "/api/product/" + productId + "/detail",
+                        apiUrl + "/api/product/" + productId + "/detail",
                         ProductDTO.Response.class
                 );
                 
@@ -170,7 +170,7 @@ public class LuckyDokiLoader {
             } else {
                 // 전체 상품 업데이트
                 products = restTemplate.getForObject(
-                        productApiUrl + "/api/product/list",
+                        apiUrl + "/api/product/list",
                         ProductDTO.Response[].class
                 );
                 

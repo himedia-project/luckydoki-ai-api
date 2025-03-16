@@ -1,8 +1,8 @@
+# 기본 설정 (local 환경)
 server:
   port: 8081
   tomcat:
     uri-encoding: UTF-8
-    # ???? ?? ??
     relaxed-query-chars: '|,{,},[,],^,`,<,>,\,;,/,?,@,#,$,%,&,=,+'
     relaxed-path-chars: '|,{,},[,],^,`,<,>,\,;,/,?,@,#,$,%,&,=,+'
 
@@ -12,10 +12,11 @@ server:
       enabled: true
       force: true
 
-
 spring:
+  profiles:
+    active: local # 로컬 프로파일 활성화
   config:
-    import: optional:file:.env[.properties] # 환경변수 파일 로드
+    import: optional:file:.env[.properties]
 
   datasource:
     url: jdbc:postgresql://localhost:5432/mydatabase
@@ -25,10 +26,7 @@ spring:
   ai:
     vectorstore:
       pgvector:
-        index-type: HNSW
-        distance-type: COSINE_DISTANCE
-        dimensions: 1536
-        table-name : mall_vector  # movie_vector hotel_vector mall_vector
+        table-name: mall_vector # movie_vector hotel_vector mall_vector
         initialize-schema: true
     openai:
       api-key: ${OPENAI_API_KEY}
@@ -36,10 +34,26 @@ spring:
         options:
           model: "gpt-4o"
 
-
 upload:
   path: static/uploads
 
+---
+# local 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: local
+
 api:
-  product:
-    url: ${API_URL}
+  url: ${API_LOCAL_URL}
+
+---
+
+# prod 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+api:
+  url: ${API_PROD_URL}

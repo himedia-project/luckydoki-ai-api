@@ -52,6 +52,7 @@ public class ImageController {
         String analysisText = imageAnalysisService.analyzeImage(file, message);
         // ","로 분리된 결과를 List<String>으로 변환
         List<String> analysisResults = List.of(analysisText.split(","));
+        log.info("Analysis results: {}", analysisResults);
 
         return ResponseEntity.ok(analysisResults);
     }

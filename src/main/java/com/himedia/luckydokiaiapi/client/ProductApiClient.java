@@ -18,8 +18,8 @@ public class ProductApiClient {
 
     private final RestTemplate restTemplate;
     
-    @Value("${api.product.url}")
-    private String productApiUrl;
+    @Value("${api.url}")
+    private String apiUrl;
     
     // RestTemplateBuilder를 주입받아 RestTemplate 생성
     public ProductApiClient(RestTemplateBuilder restTemplateBuilder) {
@@ -37,7 +37,7 @@ public class ProductApiClient {
             String fromTimeStr = fromTime.format(DateTimeFormatter.ISO_DATE_TIME);
             
             // API에서 최근 변경된 상품 목록을 조회하는 엔드포인트 호출
-            String url = productApiUrl + "/api/product/recent-changes?since=" + fromTimeStr;
+            String url = apiUrl + "/api/product/recent-changes?since=" + fromTimeStr;
             log.info("Calling API to get recently changed products: {}", url);
             
             Long[] productIds = restTemplate.getForObject(url, Long[].class);
@@ -64,7 +64,7 @@ public class ProductApiClient {
             String fromTimeStr = fromTime.format(DateTimeFormatter.ISO_DATE_TIME);
             
             // API에서 최근 추가된 상품 목록을 조회하는 엔드포인트 호출
-            String url = productApiUrl + "/api/product/recent-additions?since=" + fromTimeStr;
+            String url = apiUrl + "/api/product/recent-additions?since=" + fromTimeStr;
             log.info("Calling API to get recently added products: {}", url);
             
             Long[] productIds = restTemplate.getForObject(url, Long[].class);
