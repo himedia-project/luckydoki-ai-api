@@ -33,6 +33,10 @@ spring:
       chat:
         options:
           model: "gpt-4o"
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE}
 
 upload:
   path: static/uploads

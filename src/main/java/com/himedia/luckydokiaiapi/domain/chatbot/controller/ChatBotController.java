@@ -1,6 +1,6 @@
 package com.himedia.luckydokiaiapi.domain.chatbot.controller;
 
-
+import com.himedia.luckydokiaiapi.domain.chatbot.service.ChatMessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @RestController
@@ -23,10 +25,14 @@ public class ChatBotController {
 
     private final VectorStore vectorStore;
     private final ChatClient chatClient;
+    private final ChatMessageService chatMessageService;
 
     @GetMapping("/ask")
     public Flux<String> recommendLuckidoki(@RequestParam("question") String question) throws Exception {
         log.info("Question received: {}", question);
+        
+        // 질문 시간 기록
+        LocalDateTime questionTime = LocalDateTime.now();
 
         // Fetch similar movies using vector store
         List<Document> results = vectorStore.similaritySearch(
@@ -40,7 +46,7 @@ public class ChatBotController {
         // withTopK(1): 가장 유사한 상위 1개의 결과만 반환하도록 설정합니다.
         // 만약 .withTopK(5)로 설정하면 상위 5개의 결과를 반환
         // 결과는 List<Document>로 반환되며, 각 Document는 검색된 문서의 내용과 메타데이터를 포함
-        
+
         log.info("Found {} relevant documents", results.size());
 
         // Flux 는 Byte Stream을 처리하는데 사용되는 리액티브 API
@@ -56,12 +62,33 @@ public class ChatBotController {
                 답변:
                 """;
 
+        // 전체 응답을 저장하기 위한 변수
+        AtomicReference<StringBuilder> fullAnswerBuilder = new AtomicReference<>(new StringBuilder());
+        
+        // 응답 시작 시간 기록
+        AtomicReference<LocalDateTime> answerTimeRef = new AtomicReference<>(LocalDateTime.now());
+
+        // 응답 스트림 처리 및 MongoDB에 저장
         return chatClient.prompt()
                 .user(promptUserSpec -> promptUserSpec.text(template)
                         .param("context", results)
                         .param("question", question))
                 .stream()
-                .content();
+                .content()
+                .doOnNext(chunk -> {
+                    // 응답 청크를 누적
+                    fullAnswerBuilder.get().append(chunk);
+                })
+                .doOnComplete(() -> {
+                    // 스트림이 완료되면 MongoDB에 저장
+                    String fullAnswer = fullAnswerBuilder.get().toString();
+                    log.info("응답 완료: {}", fullAnswer);
+                    chatMessageService.saveChatMessage(
+                            question, 
+                            fullAnswer, 
+                            questionTime, 
+                            answerTimeRef.get()
+                    );
+                });
     }
-
 }
