@@ -43,6 +43,7 @@ out/
 ## resources 내 파일
 # Firebase service account file
 src/main/resources/firebase-service-account.json
-/src/main/resources/static/uploads/
+
 
 /static/uploads/
+uploads/
