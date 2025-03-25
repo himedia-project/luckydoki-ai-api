@@ -39,7 +39,7 @@ spring:
       database: ${MONGODB_DATABASE}
 
 upload:
-  path: static/uploads
+  path: /uploads
 
 ---
 # local 환경 설정
