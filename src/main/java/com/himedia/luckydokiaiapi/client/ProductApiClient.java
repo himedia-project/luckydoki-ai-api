@@ -1,8 +1,8 @@
 package com.himedia.luckydokiaiapi.client;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -14,17 +14,14 @@ import java.util.List;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ProductApiClient {
 
     private final RestTemplate restTemplate;
     
     @Value("${api.url}")
     private String apiUrl;
-    
-    // RestTemplateBuilder를 주입받아 RestTemplate 생성
-    public ProductApiClient(RestTemplateBuilder restTemplateBuilder) {
-        this.restTemplate = restTemplateBuilder.build();
-    }
+
     
     /**
      * 최근 변경된 상품 ID 목록을 조회
@@ -49,7 +46,7 @@ public class ProductApiClient {
             return Arrays.asList(productIds);
         } catch (Exception e) {
             log.error("Error fetching recently changed products: ", e);
-            return Collections.emptyList();
+            throw new RuntimeException("Error fetching recently changed products", e);
         }
     }
     
@@ -76,7 +73,7 @@ public class ProductApiClient {
             return Arrays.asList(productIds);
         } catch (Exception e) {
             log.error("Error fetching recently added products: ", e);
-            return Collections.emptyList();
+            throw new RuntimeException("Error fetching recently added products", e);
         }
     }
 } 
